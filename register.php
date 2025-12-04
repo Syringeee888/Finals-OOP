@@ -5,13 +5,18 @@ if (isset($_SESSION['email'])) header("Location: profile.php");
 $message = '';
 if (isset($_POST['register'])) {
     $data = json_decode(file_get_contents('students.json'), true) ?: [];
+
     foreach ($data as $s) {
         if ($s['email'] == $_POST['email']) {
             $message = "Email already registered!";
             break;
         }
     }
+
     if ($message == '') {
+
+        $hashedPassword = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
         $newStudent = [
             "id" => count($data) + 1,
             "name" => $_POST['name'],
@@ -19,8 +24,9 @@ if (isset($_POST['register'])) {
             "year" => $_POST['year'],
             "contact" => $_POST['contact'],
             "email" => $_POST['email'],
-            "password" => $_POST['password']
+            "password" => $hashedPassword 
         ];
+
         $data[] = $newStudent;
         file_put_contents('students.json', json_encode($data, JSON_PRETTY_PRINT));
         $message = "Registration successful! <a href='login.php'>Login here</a>";
